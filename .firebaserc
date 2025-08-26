@@ -1,5 +1,3 @@
 {
-  "projects": {
-    "default": "buildos-b423a"
-  }
+  "projects": { "default": "buildos-b423a" }
 }
