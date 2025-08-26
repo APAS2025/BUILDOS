@@ -1,0 +1,45 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push: { branches: [ main ] }
+  pull_request: { branches: [ main ] }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # required for OIDC
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: projects/740404652879/locations/global/workloadIdentityPools/github-pool/providers/github
+          service_account: github-action-1044491802@buildos-b423a.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # If your site needs a build, uncomment:
+      # - uses: actions/setup-node@v4
+      #   with: { node-version: '20', cache: 'npm' }
+      # - run: npm ci
+      # - run: npm run build
+
+      # PR previews
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: github.event_name == 'pull_request'
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          projectId: buildos-b423a
+
+      # Live deploy on main
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: github.event_name == 'push'
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          projectId: buildos-b423a
+          channelId: live
