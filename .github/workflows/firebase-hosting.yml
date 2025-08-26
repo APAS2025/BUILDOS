@@ -1,30 +1,37 @@
-name: Deploy to Firebase Hosting
+name: Build & Deploy to Firebase Hosting
 
 on:
   push: { branches: [ main ] }
-  # Optional previews:
   pull_request: { branches: [ main ] }
 
 jobs:
-  deploy:
+  web:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write        # required for OIDC
+      id-token: write   # OIDC
 
     steps:
       - uses: actions/checkout@v4
 
-      # Keyless auth (WIF) -> generates credentials file and sets ADC
+      # Keyless auth (uses your WIF provider + SA)
       - id: auth
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/740404652879/locations/global/workloadIdentityPools/github-pool/providers/github
           service_account: github-action-1044491802@buildos-b423a.iam.gserviceaccount.com
-          create_credentials_file: true    # ensures GOOGLE_APPLICATION_CREDENTIALS is set
+          create_credentials_file: true
 
-      # --- PR preview (optional) ---
-      - name: Deploy preview channel
+      # Build your Vite app to /dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+
+      # Preview deploy on PRs
+      - name: Deploy preview
         if: github.event_name == 'pull_request'
         uses: w9jds/firebase-action@v14.14.0
         with:
@@ -32,7 +39,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
 
-      # --- Live deploy on main ---
+      # Live deploy on pushes to main
       - name: Deploy live
         if: github.event_name == 'push'
         uses: w9jds/firebase-action@v14.14.0
