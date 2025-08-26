@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Keyless Google auth (WIF)
+      # Keyless Google auth (Workload Identity Federation)
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -22,7 +22,7 @@ jobs:
           service_account: github-action-1044491802@buildos-b423a.iam.gserviceaccount.com
           create_credentials_file: true
 
-      # Build the Vite app -> dist/
+      # Build Vite -> dist/
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # PR preview channel
+      # Preview deploy on PRs (URL shows in the job log)
       - name: Deploy preview
         if: github.event_name == 'pull_request'
         uses: w9jds/firebase-action@v14.14.0
@@ -39,7 +39,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
 
-      # Live deploy on main
+      # Live deploy on pushes to main
       - name: Deploy live
         if: github.event_name == 'push'
         uses: w9jds/firebase-action@v14.14.0
