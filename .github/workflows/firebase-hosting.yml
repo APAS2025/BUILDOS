@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write   # required for OIDC
+      id-token: write        # <-- required for OIDC
 
     steps:
       - uses: actions/checkout@v4
 
+      # Authenticate to Google via OIDC (no JSON key)
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -23,13 +24,13 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      # If your site needs a build, uncomment:
+      # Uncomment if you have a build step (Vite/React/etc.)
       # - uses: actions/setup-node@v4
       #   with: { node-version: '20', cache: 'npm' }
       # - run: npm ci
       # - run: npm run build
 
-      # PR previews
+      # PR preview URLs
       - uses: FirebaseExtended/action-hosting-deploy@v0
         if: github.event_name == 'pull_request'
         with:
