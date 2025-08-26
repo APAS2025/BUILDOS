@@ -8,14 +8,6 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           input: {
             main: path.resolve(__dirname, 'index.html')
-          },
-          external: ['react', 'react-dom', 'react/jsx-runtime'],
-          output: {
-            globals: {
-              'react': 'React',
-              'react-dom': 'ReactDOM',
-              'react/jsx-runtime': 'ReactJSXRuntime'
-            }
           }
         }
       },
